@@ -190,6 +190,11 @@ func readFileInfo(bctx build.Context, input string) (fileInfo, error) {
 	}
 
 	// Scan the file for imports and embeds.
+	for _, seg := range strings.Split(filepath.ToSlash(input), "/") {
+		if seg == ".." {
+			return fileInfo{}, fmt.Errorf("invalid file path")
+		}
+	}
 	f, err := os.Open(input)
 	if err != nil {
 		return fileInfo{}, err

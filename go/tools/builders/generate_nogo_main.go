@@ -25,8 +25,10 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -161,6 +163,11 @@ func genNogoMain(args []string) error {
 func buildConfig(path string) (Configs, error) {
 	if path == "" {
 		return Configs{}, nil
+	}
+	for _, seg := range strings.Split(filepath.ToSlash(path), "/") {
+		if seg == ".." {
+			return Configs{}, fmt.Errorf("invalid file path")
+		}
 	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {

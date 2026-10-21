@@ -327,6 +327,11 @@ func expandParamsFiles(args []string) ([]string, bool, error) {
 // including newlines and excepting single quotes. Characters outside quoted
 // strings may be escaped with a backslash.
 func readParamsFile(name string) ([]string, error) {
+	for _, seg := range strings.Split(filepath.ToSlash(name), "/") {
+		if seg == ".." {
+			return nil, fmt.Errorf("invalid file path")
+		}
+	}
 	data, err := ioutil.ReadFile(name)
 	if err != nil {
 		return nil, err
