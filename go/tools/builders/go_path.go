@@ -25,6 +25,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type mode int
@@ -101,6 +102,11 @@ func run(args []string) error {
 }
 
 func readManifest(path string) ([]manifestEntry, error) {
+	for _, seg := range strings.Split(filepath.ToSlash(path), "/") {
+		if seg == ".." {
+			return nil, fmt.Errorf("invalid file path")
+		}
+	}
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error reading manifest: %v", err)
@@ -113,6 +119,11 @@ func readManifest(path string) ([]manifestEntry, error) {
 }
 
 func archivePath(out string, manifest []manifestEntry) (err error) {
+	for _, seg := range strings.Split(filepath.ToSlash(out), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
+	}
 	outFile, err := os.Create(out)
 	if err != nil {
 		return err

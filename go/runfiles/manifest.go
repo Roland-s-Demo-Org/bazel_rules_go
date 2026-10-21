@@ -70,6 +70,11 @@ type manifest struct {
 }
 
 func (f ManifestFile) parse() (manifest, error) {
+	for _, seg := range strings.Split(filepath.ToSlash(string(f)), "/") {
+		if seg == ".." {
+			return manifest{}, fmt.Errorf("invalid file path")
+		}
+	}
 	r, err := os.Open(string(f))
 	if err != nil {
 		return manifest{}, fmt.Errorf("runfiles: can’t open manifest file: %w", err)
