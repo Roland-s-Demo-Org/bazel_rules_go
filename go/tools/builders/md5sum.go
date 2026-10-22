@@ -23,10 +23,16 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func md5SumFile(filename string) ([]byte, error) {
 	var result []byte
+	for _, seg := range strings.Split(filepath.ToSlash(filename), "/") {
+		if seg == ".." {
+			return nil, fmt.Errorf("invalid file path")
+		}
+	}
 	f, err := os.Open(filename)
 	if err != nil {
 		return result, err

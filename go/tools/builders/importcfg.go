@@ -38,6 +38,12 @@ type archive struct {
 // a map from source import paths to elements of archives or to nil
 // for standard library packages.
 func checkImports(files []fileInfo, archives []archive, stdPackageListPath string, importPath string, recompileInternalDeps []string) (map[string]*archive, error) {
+	// Validate the standard package list path to prevent path traversal.
+	for _, seg := range strings.Split(filepath.ToSlash(stdPackageListPath), "/") {
+		if seg == ".." {
+			return nil, fmt.Errorf("invalid file path")
+		}
+	}
 	// Read the standard package list.
 	packagesTxt, err := ioutil.ReadFile(stdPackageListPath)
 	if err != nil {
@@ -161,6 +167,12 @@ func buildImportcfgFileForLink(archives []archive, stdPackageListPath, installSu
 		return "", errors.New("GOROOT not set")
 	}
 	prefix := abs(filepath.Join(goroot, "pkg", installSuffix))
+	// Validate the standard package list path to prevent path traversal.
+	for _, seg := range strings.Split(filepath.ToSlash(stdPackageListPath), "/") {
+		if seg == ".." {
+			return "", fmt.Errorf("invalid file path")
+		}
+	}
 	stdPackageListFile, err := os.Open(stdPackageListPath)
 	if err != nil {
 		return "", err
