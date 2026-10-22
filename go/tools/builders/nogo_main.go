@@ -145,6 +145,11 @@ func saveSuggestedFixes(nogoFixDir string, diagnostics []diagnosticEntry, fset *
 	if nogoFixDir == "" {
 		return nil
 	}
+	for _, seg := range strings.Split(filepath.ToSlash(nogoFixDir), "/") {
+		if seg == ".." {
+			return []error{fmt.Errorf("invalid file path")}
+		}
+	}
 	var errs []error
 	fixes, err := getFixes(diagnostics, fset)
 	if err != nil {
@@ -168,6 +173,11 @@ func saveSuggestedFixes(nogoFixDir string, diagnostics []diagnosticEntry, fset *
 
 // Adapted from go/src/cmd/compile/internal/gc/main.go. Keep in sync.
 func readImportCfg(file string) (packageFile map[string]string, importMap map[string]string, err error) {
+	for _, seg := range strings.Split(filepath.ToSlash(file), "/") {
+		if seg == ".." {
+			return nil, nil, fmt.Errorf("invalid file path")
+		}
+	}
 	packageFile, importMap = make(map[string]string), make(map[string]string)
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -737,6 +747,11 @@ func (i *importer) readFacts(pkgPath string) ([]byte, error) {
 		// that don't have facts. For example, the "printf" analyzer must know
 		// fmt.Printf accepts a format string.
 		return nil, nil
+	}
+	for _, seg := range strings.Split(filepath.ToSlash(facts), "/") {
+		if seg == ".." {
+			return nil, fmt.Errorf("invalid file path")
+		}
 	}
 	return os.ReadFile(facts)
 }

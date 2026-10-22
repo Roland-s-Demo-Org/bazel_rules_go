@@ -25,6 +25,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type mode int
@@ -154,6 +155,16 @@ func copyPath(out string, manifest []manifestEntry) error {
 		return err
 	}
 	for _, entry := range manifest {
+		for _, seg := range strings.Split(filepath.ToSlash(entry.Src), "/") {
+			if seg == ".." {
+				return fmt.Errorf("invalid file path")
+			}
+		}
+		for _, seg := range strings.Split(filepath.ToSlash(entry.Dst), "/") {
+			if seg == ".." {
+				return fmt.Errorf("invalid file path")
+			}
+		}
 		dst := abs(filepath.Join(out, filepath.FromSlash(entry.Dst)))
 		if err := os.MkdirAll(filepath.Dir(dst), 0777); err != nil {
 			return err

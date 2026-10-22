@@ -135,6 +135,11 @@ func runNogo(workDir string, nogoPath string, srcs, ignores []string, facts []ar
 		if exitErr.ExitCode() != nogoViolation {
 			return errors.New(string(prettyOut))
 		}
+		for _, seg := range strings.Split(filepath.ToSlash(outDirPath), "/") {
+			if seg == ".." {
+				return fmt.Errorf("invalid file path")
+			}
+		}
 		outLog, err := os.Create(filepath.Join(outDirPath, nogoLogBasename))
 		if err != nil {
 			return fmt.Errorf("error creating nogo log file: %v", err)
