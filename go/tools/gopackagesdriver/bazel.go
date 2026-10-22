@@ -56,6 +56,20 @@ type BEPNamedSet struct {
 }
 
 func NewBazel(ctx context.Context, bazelBin, workspaceRoot string, buildWorkingDirectory string, bazelCommonFlags []string, bazelStartupFlags []string) (*Bazel, error) {
+	validArg := regexp.MustCompile(`^[a-zA-Z0-9_\-\./:=@+,]+$`)
+	if !validArg.MatchString(bazelBin) {
+		return nil, fmt.Errorf("invalid input")
+	}
+	for _, flag := range bazelCommonFlags {
+		if !validArg.MatchString(flag) {
+			return nil, fmt.Errorf("invalid input")
+		}
+	}
+	for _, flag := range bazelStartupFlags {
+		if !validArg.MatchString(flag) {
+			return nil, fmt.Errorf("invalid input")
+		}
+	}
 	b := &Bazel{
 		bazelBin:              bazelBin,
 		workspaceRoot:         workspaceRoot,
@@ -90,6 +104,15 @@ func (b *Bazel) fillInfo(ctx context.Context) error {
 }
 
 func (b *Bazel) run(ctx context.Context, command string, args ...string) (string, error) {
+	validArg := regexp.MustCompile(`^[a-zA-Z0-9_\-\./:=@+,]+$`)
+	if !validArg.MatchString(command) {
+		return "", fmt.Errorf("invalid input")
+	}
+	for _, arg := range args {
+		if !validArg.MatchString(arg) {
+			return "", fmt.Errorf("invalid input")
+		}
+	}
 	defaultArgs := append([]string{
 		command,
 		"--tool_tag=" + toolTag,
