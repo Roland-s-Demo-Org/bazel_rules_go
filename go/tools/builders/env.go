@@ -38,6 +38,16 @@ var (
 	cgoAbsEnvFlags = []string{"-I", "-L", "-isysroot", "-isystem", "-iquote", "-include", "-imacros", "-gcc-toolchain", "--sysroot", "-resource-dir", "-fsanitize-blacklist", "-fsanitize-ignorelist"}
 	// cgoAbsPlaceholder is placed in front of flag values that must be absolutized
 	cgoAbsPlaceholder = "__GO_BAZEL_CC_PLACEHOLDER__"
+	validCommandPath  = regexp.MustCompile(`^[a-zA-Z0-9_\-\./\\:]+$`)
+)
+
+var (
+	// cgoEnvVars is the list of all cgo environment variable
+	cgoEnvVars = []string{"CGO_CFLAGS", "CGO_CXXFLAGS", "CGO_CPPFLAGS", "CGO_LDFLAGS"}
+	// cgoAbsEnvFlags are all the flags that need absolute path in cgoEnvVars
+	cgoAbsEnvFlags = []string{"-I", "-L", "-isysroot", "-isystem", "-iquote", "-include", "-imacros", "-gcc-toolchain", "--sysroot", "-resource-dir", "-fsanitize-blacklist", "-fsanitize-ignorelist"}
+	// cgoAbsPlaceholder is placed in front of flag values that must be absolutized
+	cgoAbsPlaceholder = "__GO_BAZEL_CC_PLACEHOLDER__"
 )
 
 // env holds a small amount of Go environment and toolchain information
@@ -157,6 +167,9 @@ func (e *env) runCommand(args []string) error {
 // runCommandToFile executes a subprocess and writes stdout/stderr to the given
 // writers.
 func (e *env) runCommandToFile(out, err io.Writer, args []string) error {
+	if len(args) > 0 && !validCommandPath.MatchString(args[0]) {
+		return fmt.Errorf("invalid input")
+	}
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdout = out
 	cmd.Stderr = err
