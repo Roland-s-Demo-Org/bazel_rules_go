@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type replicateMode int
@@ -58,6 +59,16 @@ func replicatePrepare(dst string, config *replicateConfig) error {
 
 // replicateFile is called internally by replicate to map a single file from src into dst.
 func replicateFile(src, dst string, config *replicateConfig) error {
+	for _, seg := range strings.Split(filepath.ToSlash(src), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
+	}
+	for _, seg := range strings.Split(filepath.ToSlash(dst), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
+	}
 	if err := replicatePrepare(dst, config); err != nil {
 		return err
 	}

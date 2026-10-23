@@ -4,11 +4,24 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func nogoValidation(args []string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("usage: nogovalidation <validation_output> <out_dir>\n\tgot: %v+", args)
+	}
+	// Validate args[0] to prevent path traversal
+	for _, seg := range strings.Split(filepath.ToSlash(args[0]), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
+	}
+	// Validate args[1] to prevent path traversal
+	for _, seg := range strings.Split(filepath.ToSlash(args[1]), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
 	}
 	// Always create the output file to avoid an unhelpful "action failed to create outputs" error.
 	out, err := os.Create(args[0])
