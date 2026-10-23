@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -78,6 +79,11 @@ func (h *header) deterministic() *header {
 // - File Modes
 // The archive is modified in place.
 func stripArMetadata(archivePath string) error {
+	for _, seg := range strings.Split(filepath.ToSlash(archivePath), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
+	}
 	archive, err := os.OpenFile(archivePath, os.O_RDWR, 0)
 	if err != nil {
 		return err

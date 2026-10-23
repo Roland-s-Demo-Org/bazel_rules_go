@@ -225,8 +225,10 @@ func extractedPath(dir, stripPrefix, entryName string) (string, error) {
 	if path.IsAbs(entryName) {
 		return "", fmt.Errorf("entry has an absolute path: %q", entryName)
 	}
-	if strings.HasPrefix(entryName, "../") {
-		return "", fmt.Errorf("entry refers to something outside the archive: %q", entryName)
+	for _, seg := range strings.Split(filepath.ToSlash(entryName), "/") {
+		if seg == ".." {
+			return "", fmt.Errorf("invalid file path")
+		}
 	}
 	entryName = strings.TrimSuffix(entryName, "/")
 	if path.Clean(entryName) != entryName {

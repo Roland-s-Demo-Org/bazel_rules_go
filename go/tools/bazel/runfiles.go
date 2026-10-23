@@ -362,6 +362,12 @@ func initRunfiles() {
 		// On Windows, Bazel doesn't create a symlink tree of runfiles because
 		// Windows doesn't support symbolic links by default. Instead, runfile
 		// locations are written to a manifest file.
+		for _, seg := range strings.Split(filepath.ToSlash(manifest), "/") {
+			if seg == ".." {
+				runfiles.err = fmt.Errorf("invalid file path")
+				return
+			}
+		}
 		runfiles.index = newIndex()
 		data, err := ioutil.ReadFile(manifest)
 		if err != nil {
