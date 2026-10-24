@@ -35,6 +35,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 )
 
@@ -66,6 +67,11 @@ func Format(a *Archive) []byte {
 
 // ParseFile parses the named file as an archive.
 func ParseFile(file string) (*Archive, error) {
+	for _, seg := range strings.Split(filepath.ToSlash(file), "/") {
+		if seg == ".." {
+			return nil, fmt.Errorf("invalid file path")
+		}
+	}
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		return nil, err

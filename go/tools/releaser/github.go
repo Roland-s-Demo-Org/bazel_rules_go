@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/google/go-github/v36/github"
@@ -115,6 +116,11 @@ func (f *githubTokenFlag) Set(v string) error {
 	if strings.HasPrefix(v, "ghp_") {
 		*(*string)(f) = v
 		return nil
+	}
+	for _, seg := range strings.Split(filepath.ToSlash(v), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
 	}
 	data, err := os.ReadFile(v)
 	if err != nil {

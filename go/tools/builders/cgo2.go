@@ -434,6 +434,16 @@ func (e cgoError) Error() string {
 }
 
 func copyFile(inPath, outPath string) error {
+	for _, seg := range strings.Split(filepath.ToSlash(inPath), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
+	}
+	for _, seg := range strings.Split(filepath.ToSlash(outPath), "/") {
+		if seg == ".." {
+			return fmt.Errorf("invalid file path")
+		}
+	}
 	inFile, err := os.Open(inPath)
 	if err != nil {
 		return err
